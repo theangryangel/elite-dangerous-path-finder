@@ -40,7 +40,7 @@ def find_systems():
     i = 0
     ret = []
     for v in g.vertices():
-        if len(q) < 1 or q.lower() in str(g.vertex_properties['system_name'][v]).lower():
+        if len(q) < 1 or str(g.vertex_properties['system_name'][v]).lower().startswith( q.lower() ):
             ret.append(vtx_to_json(v))
             i = i + 1
         
@@ -76,7 +76,7 @@ def find_path(origin_id, destination_id, max_jump_distance):
         g, 
         efilt=lambda e: (g.edge_properties['jump_distance'][e]) <= float(max_jump_distance)
     ) 
-    vlist,elist = gt.shortest_path(v, origin, destination)
+    vlist,elist = gt.shortest_path(v, origin, destination, g.edge_properties['jump_distance'])
 
     ret = []
 

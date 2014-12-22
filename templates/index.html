@@ -36,7 +36,6 @@
 			}
 
 			/* Page stylin' */
-
 			body > .container {
 				padding: 80px 15px 20px;
 			}
@@ -113,9 +112,13 @@
 		</div>
 
 
-		<div class="container">
-			<div class="row" ng-controller="PathController">
-				<div class="col-md-6">
+		<div class="container" ng-controller="PathController">
+			<div class="alert alert-warning" ng-hide="searching || path.length > 0">
+				No valid path found.
+			</div>
+
+			<div class="row">
+				<div class="col-md-4">
 
 					<form name="search" id="search" role="form">
 
@@ -151,7 +154,7 @@
 						</div>
 
 						<div class="form-group">
-							<button ng-disabled="searching" type="submit" class="btn btn-default"
+							<button ng-disabled="searching || !inputs_valid()" type="submit" class="btn btn-default"
 								ng-click="find_shortest_path()">
 								<div class="spinner" ng-show="searching">
 									<div class="bounce1"></div>
@@ -163,30 +166,38 @@
 					</form>
 				</div>
 
-				<div class="col-md-6">
-					<div class="alert alert-warning" ng-hide="searching || path.length > 0">
-						No valid path found.
-					</div>
-
+				<div class="col-md-4">
 					<table class="table table-striped table-hover table-condensed table-response">
 						<thead>
 							<tr>
-								<th>Type</th>
+								<th style="width: 4em" class="text-center">Type</th>
 								<th>Info</th>
 							</tr>
 						</thead>
 						<tbody>
 							<tr ng-repeat="p in path">
-								<td ng-if="p.type == 'vertex'">System</td>
+								<td class="text-center">
+									<i ng-if="p.type == 'vertex'" class="glyphicon glyphicon-star"></i>
+									<i ng-if="p.type == 'edge'" class="glyphicon glyphicon-road"></i>
+								</td>
+								
 								<td ng-if="p.type == 'vertex'">{{ p.name }}</td>
-								<td ng-if="p.type == 'edge'">Jump</td>
 								<td ng-if="p.type == 'edge'">{{ p.jump_distance }} ly</td>
 							</tr>
 						</tbody>
 					</table>
-
 				</div>
 
+				<div class="col-md-4">
+					<dl class="dl-horizontal">
+						<dt>Straight line distance</dt>
+						<dd>{{ stats_straight_line_distance }} ly</dd>
+						<dt>Total jump distance</dt>
+						<dd>{{ stats_total_jump_distance }} ly</dd>
+						<dt>Total jumps</dt>
+						<dd>{{ stats_total_jumps }}</dd>
+					</dl>
+				</div>
 			</div>
 		</div>
 
@@ -220,9 +231,22 @@
 
 					$scope.origin = null;
 					$scope.destination = null;
+					
+					$scope.stats_total_jump_distance = 0;
+					$scope.stats_total_jumps = 0;
+					$scope.stats_straight_line_distance = 0;
 
 					$scope.max_jump_distance = 15;
 					$scope.searching = false;
+
+					$scope.inputs_valid = function()
+					{
+						return (
+							$scope.origin && $scope.origin.id > 0 &&
+							$scope.destination && $scope.destination.id > 0 &&
+							$scope.max_jump_distance > 0
+						)
+					}
 
 					$scope.get_systems = function(val)
 					{
@@ -239,12 +263,30 @@
 					$scope.find_shortest_path = function()
 					{
 						var url = '/api/path/' + $scope.origin.id + '/' + $scope.destination.id + '/' + $scope.max_jump_distance;
+
 						$scope.searching = true;
+						$scope.reset();
+
 						$http.get(url).
 						success(function(data, status, headers, config)
 						{
 							$scope.searching = false;
 							$scope.path = data;
+
+							data.forEach(function(e, index, array)
+							{
+								if (e.type != 'edge')
+									return;
+
+								$scope.stats_total_jump_distance += e.jump_distance;
+								$scope.stats_total_jumps += 1;
+							});
+
+							var xd = $scope.destination.x - $scope.origin.x;
+							var yd = $scope.destination.y - $scope.origin.y;
+							var zd = $scope.destination.z - $scope.origin.z;
+
+							$scope.stats_straight_line_distance = Math.sqrt(xd*xd + yd*yd + zd*zd);
 						}).
 						error(function(data, status, headers, config)
 						{
@@ -252,6 +294,14 @@
 							alert('Error ' + data);
 						});
 					};
+
+					$scope.reset = function()
+					{
+						$scope.path = [];
+						$scope.stats_total_jumps = 0;
+						$scope.stats_total_jump_distance = 0;
+						$scope.stats_straight_line_distance = 0;
+					}
 				}]);
 			</script>
 		</body>
