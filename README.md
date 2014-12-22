@@ -41,7 +41,10 @@ not yet possible to distribute this to multiple machines.
 	Core i7 late 2013 Macbook Pro this takes around 30 minutes. As more features
 	are added this will take longer. 
 
-### Interogating the data
+## Interogating the data - via web interface
+  - `python web.py` and then open http://localhost:3000/
+
+## Interogating the data - via command line
   - `python path.py` to find the shortest path from any 2 given points. No
 	arguments for now, just edit the file.
 
