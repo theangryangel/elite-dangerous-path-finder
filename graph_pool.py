@@ -68,32 +68,41 @@ def find_valid_jumps(destination, origin):
         return { 'origin': origin['vertex_index'], 'destination':
                 destination['vertex_index'], 'jump_distance': total_dist }
 
-
 process_count = multiprocessing.cpu_count() * 2 + 1
 
-# It may be possible to parallelize this further by having a process pool for
-# the systems. However, for simplicity this works at an acceptable speed.
-# By simply parallelizing like this, it takes the job (when single process) from
-# 5+ hours on my core i7 laptop to <30 minutes.
 print "Calculating valid jumps..."
-
-for system in cache:
-    pool = multiprocessing.Pool(processes=process_count)
+def iterate_systems(system, cache):
     partial_find_valid_jumps = partial(find_valid_jumps, origin=system)
-    res = pool.map(partial_find_valid_jumps, cache)
-    pool.close()
-    pool.join()
+    res = map(partial_find_valid_jumps, cache)
     res = filter(None, res)
 
-    print 'Origin system %s %d valid jumps' % (
-        g.vertex_properties['system_name'][g.vertex(system['vertex_index'])],
-        len(res)
-    )
-        
-    for edge in res:
+    print ' %d has %d valid jumps' % (system['vertex_index'], len(res))
+
+    return res
+
+# We split out the system -> all systems distance calculation across multiple
+# processes to speed up the calculation.
+# Previously I split the distance calc and did 1 system at once. 
+# Instead we split the origin systems and do all distance calcs for that one at
+# once. 
+# This changes the job from 30-45min run for 50ly max jump to <= 16mins on my
+# 2013 mbp.
+# execnet for future expansion.
+pool = multiprocessing.Pool(processes=process_count)
+partial_iterate_systems = partial(iterate_systems, cache=cache)
+res = pool.map(partial_iterate_systems, cache)
+pool.close()
+pool.join()
+res = filter(None, res)
+
+# Theres probably a better way of doing this.
+print 'Adding edges...'
+for edge_collection in res:
+    for edge in edge_collection:
+        print ' %d -> %d @ %d' % (edge['origin'],
+                edge['destination'], edge['jump_distance'])
         j = g.add_edge(edge['origin'], edge['destination'])
         g.edge_properties['jump_distance'][j] = edge['jump_distance']
-
 
 print "Removing parallel edges..."
 remove_parallel_edges(g)
@@ -102,6 +111,6 @@ print "Removing loops..."
 remove_self_loops(g)
 
 print "Saving..."
-g.save("graph_pool.xml.gz")
+g.save("graph_pool2.xml.gz")
 
 print "Job's done!"
