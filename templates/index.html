@@ -146,8 +146,7 @@
 						<pre>{{destination | json}}</pre>
 
 						<div class="form-group has-feedback">
-							<label for="max_jump_distance">Max jump distance
-								(ly)</label>
+							<label for="max_jump_distance">Max jump distance (ly)</label>
 							<input type="number" class="form-control"
 							id="max_jump_distance" name="max_jump_distance" placeholder="Enter max jump
 							distance (ly)" step="any" ng-model="max_jump_distance">
@@ -178,17 +177,32 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr ng-repeat="p in path" toggle-class="highlight">
+							<tr ng-repeat="p in path" toggle-class="highlight"
+								data-turn-by-turn-id="{{ $index }}"
+								ng-class="{highlight: turnbyturnid == $index }">
 								<td class="text-center">
 									<i ng-if="p.type == 'vertex'" class="glyphicon glyphicon-star"></i>
-									<i ng-if="p.type == 'edge'" class="glyphicon glyphicon-road"></i>
+									<i ng-if="p.type == 'edge'" class="glyphicon
+										glyphicon-road small"></i>
 								</td>
 								
 								<td ng-if="p.type == 'vertex'">{{ p.name }}</td>
-								<td ng-if="p.type == 'edge'">{{ p.jump_distance }} ly</td>
+								<td ng-if="p.type == 'edge'" class="small">{{ p.jump_distance }} ly</td>
 							</tr>
 						</tbody>
 					</table>
+
+
+					<nav>
+						<ul class="pager">
+							<li><a class="btn" ng-click="previousTurn()"
+								ng-disabled="!previousTurnValid()">&larr;
+								Previous jump</a></li>
+							<li><a class="btn" ng-click="nextTurn()"
+								ng-disabled="!nextTurnValid()">Next jump &rarr;</a></li>
+						</ul>
+					</nav>
+
 				</div>
 
 				<div class="col-xs-6 col-md-4">
@@ -254,6 +268,8 @@
 					$scope.max_jump_distance = 15;
 					$scope.searching = false;
 
+					$scope.turnbyturnid = 0;
+
 					$scope.inputs_valid = function()
 					{
 						return (
@@ -316,7 +332,30 @@
 						$scope.stats_total_jumps = 0;
 						$scope.stats_total_jump_distance = 0;
 						$scope.stats_straight_line_distance = 0;
-					}
+						$scope.turnbyturnid = 0;
+					};
+
+					$scope.previousTurnValid = function()
+					{
+						return ($scope.turnbyturnid - 2 >= 0);
+					};
+
+					$scope.previousTurn = function()
+					{
+						if ($scope.previousTurnValid())
+							$scope.turnbyturnid = $scope.turnbyturnid - 2;
+					};
+
+					$scope.nextTurnValid = function()
+					{
+						return ($scope.turnbyturnid + 2 < $scope.path.length);
+					};
+
+					$scope.nextTurn = function()
+					{
+						if ($scope.nextTurnValid())
+							$scope.turnbyturnid = $scope.turnbyturnid + 2;
+					};
 				}]);
 			</script>
 		</body>
