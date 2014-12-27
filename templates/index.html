@@ -99,6 +99,9 @@
 			input[type=number] { -moz-appearance: textfield }
 			::-webkit-inner-spin-button { -webkit-appearance: none }
 			::-webkit-outer-spin-button { -webkit-appearance: none }
+
+			/* Table highlighting on click */
+			.table-striped tbody tr.highlight td { background-color: #FCF8E3; }
 		</style>
 	</head>
 	<body>
@@ -147,7 +150,7 @@
 								(ly)</label>
 							<input type="number" class="form-control"
 							id="max_jump_distance" name="max_jump_distance" placeholder="Enter max jump
-							distance (ly)" ng-model="max_jump_distance">
+							distance (ly)" step="any" ng-model="max_jump_distance">
 
 							<i class="glyphicon glyphicon-ok form-control-feedback" ng-show="search.max_jump_distance.$valid"></i>
 							<i class="glyphicon glyphicon-remove form-control-feedback" ng-hide="search.max_jump_distance.$valid"></i>
@@ -175,7 +178,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr ng-repeat="p in path">
+							<tr ng-repeat="p in path" toggle-class="highlight">
 								<td class="text-center">
 									<i ng-if="p.type == 'vertex'" class="glyphicon glyphicon-star"></i>
 									<i ng-if="p.type == 'edge'" class="glyphicon glyphicon-road"></i>
@@ -225,6 +228,18 @@
 
 		<script type="text/javascript" charset="utf-8">
 			angular.module('edpfApp', ['ui.bootstrap'])
+			.directive('toggleClass', function() {
+				return {
+					restrict: 'A',
+					link: function(scope, element, attrs)
+					{
+						element.bind('click', function()
+						{
+							element.toggleClass(attrs.toggleClass);
+						});
+					}
+				};
+			})
 			.controller('PathController', ['$scope', '$http', function($scope, $http)
 				{
 					$scope.path = [];

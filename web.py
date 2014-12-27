@@ -65,7 +65,7 @@ def find_system_by_name(name):
     
     return vtx_to_json(systems[0])
 
-@bottle.route('/api/path/<origin_id:re:\d+>/<destination_id:re:\d+>/<max_jump_distance:re:\d+>')
+@bottle.route('/api/path/<origin_id:re:\d+>/<destination_id:re:\d+>/<max_jump_distance:re:\d*\.?\d*>')
 def find_path(origin_id, destination_id, max_jump_distance):
     origin = g.vertex(origin_id)
     destination = g.vertex(destination_id)

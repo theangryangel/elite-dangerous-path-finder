@@ -5,6 +5,18 @@ max_jump_distance = 15
 print 'Loading graph...'
 g = load_graph("graph_pool.xml.gz")
 
+vertices = 0
+for i in g.vertices():
+    vertices = vertices + 1
+
+print "%d vertices" % vertices
+
+edges = 0
+for i in g.edges():
+    edges = edges + 1
+
+print "%d edges" % edges
+
 print 'Finding vertex...'
 origin = find_vertex(g, g.vertex_properties['system_name'], "Sol")[0]
 

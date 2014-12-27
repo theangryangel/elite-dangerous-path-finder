@@ -16,7 +16,6 @@ shocking. I know. I don't care.
   - Form into a complete product
   - Speed up importer - maybe using execnet for multiple machine calculation
   - Check if jump occlusion matters in the game
-  - Check if calculated jumps are actually correct in the game
   - Find a way of speeding up shortest_path searches with >=19.56ly jumps
 
 ## Installing
@@ -28,20 +27,18 @@ shocking. I know. I don't care.
 I've included my own pre-calculated data. If for some reason you want to
 alter/update/edit, then follow the below.
 
-Be aware this can take 30+ minutes, depending on the spec of your machine. It is
-not yet possible to distribute this to multiple machines.
+Be aware this can take some time, depending on the spec of your machine. It is
+not yet possible to distribute this to multiple machines, although as the
+dataset increases I will investigate this.
 
-On my Core i7 late 2013 Macbook Pro this takes around 16 minutes. As more features 
-are added this will take longer. 
+On my late 2013 Macbook Pro this takes around 16 minutes. 
 
-  - `python fetch.py` to get a list of stars from
+  - `python fetch.py` to get a list of systems from
 	[Elite Dangerous Star Coordinator](http://edstarcoordinator.com/). Be
 	kind. Don't do this too often. response.json contains a cached response.
-  - `python graph_pool.py` to rebuild graph_pool.xml.gz. This will contain a
-	precalculated graph of stars and feasible jumps. This currently assumes
-	several things and needs to be investigated as to whether or not things like
-	jumps with systems in the way need to be removed.
-	It pre-calculates all possible jumps using multiple python processes.
+  - `python graph_pool.py` to rebuild graph_pool.xml.gz from a cached
+	response.json. This will contain a precalculated graph of stars and feasible 
+	jumps.
 
 ## Interogating the data - via web interface
   - `python web.py` and then open http://localhost:3000/
